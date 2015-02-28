@@ -1,0 +1,15 @@
+{
+  "name": "megalinks",
+  "version": "1.0.0",
+  "description": "Simple scraping wrapper to get megalinks from /r/megalinks and create a file with a list for manual inspection",
+  "main": "scraper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.18.0",
+    "request": "^2.53.0"
+  }
+}
