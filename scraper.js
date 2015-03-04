@@ -53,7 +53,7 @@ function getAll(links, text) {
     var newMegaLinks = [];
     console.log(this.href);
     if (isGoodHref(this.href)) {
-      newMegaLinks.push([this.href]);
+      newMegaLinks.push(this.href);
     } else {
 
       var $ = cheerio.load(body);
