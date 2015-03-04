@@ -48,9 +48,9 @@ function getAll(links, text) {
 
   var key = text.pop();
   if (Object.keys(collection).indexOf(key) > -1) {
-    console.log('updating: ', key);
+    console.log('Updating: ', key);
   } else {
-    console.log('found something new: ', key);
+    console.log('Found something new: ', key);
   }
 
   request(links.pop(), function(err, response, body) {
@@ -65,6 +65,16 @@ function getAll(links, text) {
         var newHref = $(this).attr('href');
         if (isGoodHref(newHref)) {
           newMegaLinks.push(newHref);
+        }
+      });
+
+      var re = /mega:#![\w\!-]+/;
+      $('p').each(function(p, el) {
+        var text = $(this).text();
+        if (text.match(re)) {
+          var megaTag = text.match(re)[0];
+          link = megaTag.replace(/mega:/, "https://mega.co.nz/");
+          newMegaLinks.push(link);
         }
       });
 
