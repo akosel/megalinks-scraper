@@ -12,6 +12,10 @@ try {
 
 } 
 
+function findNonTraditionalLinks(html) {
+  html.match(/mega:#!.*\s/g); 
+}
+
 function isGoodHref(href) {
   var urlObj;
   if (href) {

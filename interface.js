@@ -24,18 +24,23 @@ text.forEach(function(t) {
 
 process.stdin.on('data', function (text) {
   console.log('received data:', util.inspect(text));
-  var link = options[Number(text)]
-  console.log(link);
-  var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', link[0]])
-  megadl.stdout.on('data', function(data) {
-    console.log(data.toString());
-  });
-  megadl.stderr.on('data', function(data) {
-    console.log(data.toString());
-  });
-  megadl.on('close', function(data) {
-    console.log('All done! :)');
-  });
+  var choice = Number(text);
+  if (choice && choice < options.length) {
+    var link = options[choice]
+    console.log(link);
+    var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', link[0]])
+    megadl.stdout.on('data', function(data) {
+      console.log(data.toString());
+    });
+    megadl.stderr.on('data', function(data) {
+      console.log(data.toString());
+    });
+    megadl.on('close', function(data) {
+      console.log('All done! :)');
+    });
+  } else if (choice && choice >= options.length) {
+    console.log('Choice is out of range. Please enter one of the numbers listed.');
+  }
       
   if (text === 'q\n') {
     done();
