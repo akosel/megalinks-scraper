@@ -4,6 +4,8 @@ var spawn = require('child_process').spawn;
 var util = require('util');
 var fs   = require('fs');
 
+//console.log('Running update');
+//var update = spawn('node', ['/home/pi/megalinks/scraper.js']);
 
 console.log('Hi, the following is a list of links scraped from /r/megalinks. To download, type the number next to the link');
 
@@ -30,7 +32,7 @@ process.stdin.on('data', function (text) {
     console.log(link);
     var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', link[0]])
     megadl.stdout.on('data', function(data) {
-      console.log(data.toString());
+      //console.log(data.toString());
     });
     megadl.stderr.on('data', function(data) {
       console.log(data.toString());
