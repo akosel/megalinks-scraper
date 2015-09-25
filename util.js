@@ -10,9 +10,13 @@ module.exports = function(path) {
     isGoodHref: function(href) {
       var urlObj;
       if (href) {
-        urlObj = url.parse(href);
+        try {
+          urlObj = url.parse(href);
+        } catch(e) {
+          console.log('Error: ', e);
+        }
       }
-      if (urlObj && urlObj.host === 'mega.co.nz') {
+      if (urlObj && (urlObj.host === 'mega.co.nz' || urlObj.host === 'mega.nz')) {
         console.log('Grabbing href', href);
         return true;
       }
@@ -53,17 +57,21 @@ module.exports = function(path) {
       request(url, function(err, response, body) {
         var newLinks = [];
         var newTexts = [];
-        var $ = cheerio.load(body);
-        $('a.title').each(function(a, el) {
-          var newHref = $(this).attr('href');
-          var text = $(this).text();
-          if (self.isGoodHref(newHref)) {
-            self.collection[text] = newHref;
-          } else {
-            newLinks.push('http://www.reddit.com' + newHref);
-            newTexts.push($(this).text());
-          }
-        });
+        try {
+          var $ = cheerio.load(body);
+          $('a.title').each(function(a, el) {
+            var newHref = $(this).attr('href');
+            var text = $(this).text();
+            if (self.isGoodHref(newHref)) {
+              self.collection[text] = newHref;
+            } else {
+              newLinks.push('http://www.reddit.com' + newHref);
+              newTexts.push($(this).text());
+            }
+          });
+        } catch(e) {
+          console.log('Error: ', e);
+        }
 
         if (newLinks.length) {
           self.getAll(newLinks, newTexts);
@@ -91,27 +99,31 @@ module.exports = function(path) {
           newMegaLinks.push(this.href);
         } else {
 
-          var $ = cheerio.load(body);
-          $('a').each(function(a, el) {
-            var newHref = $(this).attr('href');
-            if (self.isGoodHref(newHref)) {
-              newMegaLinks.push(newHref);
-            }
-          });
+          try {
+            var $ = cheerio.load(body);
+            $('a').each(function(a, el) {
+              var newHref = $(this).attr('href');
+              if (self.isGoodHref(newHref)) {
+                newMegaLinks.push(newHref);
+              }
+            });
 
-          var re = /mega:#![\w\!-]+/;
-          $('p').each(function(p, el) {
-            var text = $(this).text();
-            if (text.match(re)) {
-              var megaTag = text.match(re)[0];
-              link = megaTag.replace(/mega:/, "https://mega.co.nz/");
-              newMegaLinks.push(link);
-            }
-          });
+            var re = /mega:#![\w\!-]+/;
+            $('p').each(function(p, el) {
+              var text = $(this).text();
+              if (text.match(re)) {
+                var megaTag = text.match(re)[0];
+                link = megaTag.replace(/mega:/, "https://mega.co.nz/");
+                newMegaLinks.push(link);
+              }
+            });
 
-        }
+          } catch(e) {
+            console.log('Error: ', e);
+          }
 
-        self.collection[key] = newMegaLinks;
+          self.collection[key] = newMegaLinks;
+        } 
         if (links.length) {
           self.getAll(links, text);
         } else {

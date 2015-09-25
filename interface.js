@@ -3,6 +3,8 @@ process.stdin.setEncoding('utf8');
 var spawn = require('child_process').spawn;
 var util = require('util');
 var fs   = require('fs');
+var out = fs.openSync('/tmp/out.log', 'a');
+var err = fs.openSync('/tmp/out.log', 'a');
 
 //console.log('Running update');
 //var update = spawn('node', ['/home/pi/megalinks/scraper.js']);
@@ -27,19 +29,42 @@ text.forEach(function(t) {
 process.stdin.on('data', function (text) {
   console.log('received data:', util.inspect(text));
   var choice = Number(text);
+  var started = false;
   if (choice && choice < options.length) {
     var link = options[choice]
     console.log(link);
-    var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', link[0]])
-    megadl.stdout.on('data', function(data) {
-      //console.log(data.toString());
-    });
-    megadl.stderr.on('data', function(data) {
-      console.log(data.toString());
-    });
-    megadl.on('close', function(data) {
-      console.log('All done! :)');
-    });
+    if (typeof link === 'object') {
+      link.forEach(function(v) {
+        var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', v], [], { detached: true, stdio: ['ignore', out, err] }); 
+
+        megadl.stdout.on('data', function(data) {
+          if (!started) {
+            console.log(data.toString());
+            started = true;
+          }
+        });
+        megadl.stderr.on('data', function(data) {
+          console.error(data.toString());
+        });
+        megadl.on('close', function(data) {
+          console.log('All done! :)');
+        });
+      });
+    } else {
+      var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', link], [], { detached: true, stdio: ['ignore', out, err] })
+      megadl.stdout.on('data', function(data) {
+        if (!started) {
+          console.log(data.toString());
+          started = true;
+        }
+      });
+      megadl.stderr.on('data', function(data) {
+        console.error(data.toString());
+      });
+      megadl.on('close', function(data) {
+        console.log('All done! :)');
+      });
+    }
   } else if (choice && choice >= options.length) {
     console.log('Choice is out of range. Please enter one of the numbers listed.');
   }
