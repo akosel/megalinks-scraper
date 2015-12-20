@@ -4,7 +4,7 @@
   "description": "Simple scraping wrapper to get megalinks from /r/megalinks and create a file with a list for manual inspection",
   "main": "scraper.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine-node spec/"
   },
   "author": "",
   "license": "ISC",

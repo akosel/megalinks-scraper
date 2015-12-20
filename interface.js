@@ -14,12 +14,17 @@ console.log('Hi, the following is a list of links scraped from /r/megalinks. To 
 var links = fs.readFileSync('./megalinks.json');
 var linksObj = JSON.parse(links);
 
+if (process.argv[2]) {
+  var re = new RegExp(process.argv[2], 'i');
+  console.log(re);
+}
+
 var text = Object.keys(linksObj);
 var options = [];
 var i = 0;
 text.forEach(function(t) {
   var active = linksObj[t];
-  if (active.length) {
+  if (active.length && (!re || t.match(re))) {
     console.log(['[' + i + ']', t, linksObj[t]].join('\t'));
     options.push(linksObj[t]);
     i += 1;
@@ -35,7 +40,7 @@ process.stdin.on('data', function (text) {
     console.log(link);
     if (typeof link === 'object') {
       link.forEach(function(v) {
-        var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', v], [], { detached: true, stdio: ['ignore', out, err] }); 
+        var megadl = spawn("/home/pi/megatools/megadl", ['--path=/media/exthd', v], [], { detached: true, stdio: ['ignore', out, err] }); 
 
         megadl.stdout.on('data', function(data) {
           if (!started) {
@@ -51,7 +56,7 @@ process.stdin.on('data', function (text) {
         });
       });
     } else {
-      var megadl = spawn("/home/pi/megatools/megadl", ['--path=/home/pi/usbdrv', link], [], { detached: true, stdio: ['ignore', out, err] })
+      var megadl = spawn("/home/pi/megatools/megadl", ['--path=/media/exthd', link], [], { detached: true, stdio: ['ignore', out, err] })
       megadl.stdout.on('data', function(data) {
         if (!started) {
           console.log(data.toString());
