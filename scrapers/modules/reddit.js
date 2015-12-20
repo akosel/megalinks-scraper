@@ -29,6 +29,13 @@ RedditScraper.prototype.getSearchUrl = function() {
 };
 
 /*
+ * Set value
+ */
+RedditScraper.prototype.set = function(prop, value) {
+  this[prop] = value;
+};
+
+/*
  * Finds megalinks on reddit pages
  */
 RedditScraper.prototype.scrape = function() {

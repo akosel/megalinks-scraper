@@ -1,5 +1,5 @@
 /*
- * megalist_link.js
+ * megalink_list.js
  * List of megalinks 
  */
 var url = require('url');
@@ -9,6 +9,9 @@ var MegalinkList = function(path) {
   this.path = path || '/tmp/megalinks.json';
 };
 
+/*
+ * Loads data into collection
+ */
 MegalinkList.prototype.fetch = function() {
   try {
     var previousMegalinks = fs.readFileSync(this.path);
@@ -18,6 +21,9 @@ MegalinkList.prototype.fetch = function() {
   } 
 };
 
+/*
+ * Add a megalink to the list collection
+ */
 MegalinkList.prototype.add = function(megalink) {
   var name = megalink.name;
   var links = megalink.links;
@@ -25,6 +31,9 @@ MegalinkList.prototype.add = function(megalink) {
   this.collection[name] = links;
 };
 
+/*
+ * Save link list
+ */
 MegalinkList.prototype.save = function(list) {
   // TODO save to file/db
   // Sanity check to avoid data loss

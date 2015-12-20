@@ -69,7 +69,7 @@ Megalink.prototype.save = function() {
  */
 Megalink.prototype.download = function() {
   this.links.forEach(function(link) {  
-    var megadl = spawn("/home/pi/megatools/megadl", ['--path=/media/exthd', link], [], { detached: true, stdio: ['ignore', out, err] }); 
+    var megadl = spawn("megadl", ['--path=/media/exthd', link], [], { detached: true, stdio: ['ignore', out, err] }); 
 
     megadl.stderr.on('data', function(data) {
       console.error(data.toString());

@@ -1,4 +1,6 @@
 var program = require('commander');
+var store = require('./models/store');
+
 
 program
   .version('0.0.1')
@@ -8,9 +10,13 @@ program
 
 var Scraper = require('./scrapers/modules/' + program.type);
 
-var scraper = new Scraper();
+var searchTerm = program.searchTerm ? program.searchTerm : undefined;
+var scraper = new Scraper(searchTerm);
 scraper.scrape().then(function() {
-  console.log(scraper.megalinks);
+  scraper.megalinks.forEach(function(megalink) {
+    store.add(megalink); 
+  });
+  store.save();
 }, function(e) {
   console.log(e); 
 });
