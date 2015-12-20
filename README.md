@@ -4,9 +4,7 @@ Node scraper that checks for links in /r/megalinks on reddit and creates a json 
 # Install
 1. Clone the git repository
 2. Run `npm install`
+3. Install [Megatools](https://github.com/megous/megatools)
 
 # To use
 Run `scraper.js` at a bare minimum. This will scrape the latest links from reddit.
-
-# To do
-Improve interface.js to use the new architecture
