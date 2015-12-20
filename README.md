@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/akosel/megalinks-scraper.svg?branch=master)](https://travis-ci.org/akosel/megalinks-scraper)
+
 # megalinks-scraper
 Node scraper that checks for links in /r/megalinks on reddit and creates a json file with a direct reference to any mega.co.nz links posted in comments or elsewhere.
 
