@@ -8,3 +8,4 @@ Node scraper that checks for links in /r/megalinks on reddit and creates a json 
 
 # To use
 Run `scraper.js` at a bare minimum. This will scrape the latest links from reddit.
+After this, run `downloader.js` to see the available links. Entering the number will attempt to download a given link.
