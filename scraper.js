@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var program = require('commander');
 var store = require('./models/store');
 
@@ -13,6 +14,7 @@ var Scraper = require('./scrapers/modules/' + program.type);
 var searchTerm = program.searchTerm ? program.searchTerm : undefined;
 var scraper = new Scraper(searchTerm);
 scraper.scrape().then(function() {
+  console.log('Scrape complete', scraper.megalinks);
   scraper.megalinks.forEach(function(megalink) {
     store.add(megalink); 
   });

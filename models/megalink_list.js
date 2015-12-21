@@ -28,7 +28,15 @@ MegalinkList.prototype.add = function(megalink) {
   var name = megalink.name;
   var links = megalink.links;
 
-  this.collection[name] = links;
+  if (this.collection[name]) {
+    links.forEach(function(link) {
+      if (this.collection[name].indexOf(link) === -1) {
+        this.collection[name].push(link);
+      }
+    }.bind(this));
+  } else {
+    this.collection[name] = links;
+  }
 };
 
 /*

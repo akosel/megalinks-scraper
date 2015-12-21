@@ -25,6 +25,17 @@ Scraper.prototype.save = function() {
 };
 
 /*
+ * Check if a link is a keeplink
+ */
+Scraper.prototype.isKeeplink = function(url) {
+  if (url.indexOf('keeplink') > -1) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+/*
  * Validates whether href is valid
  */
 Scraper.prototype.isValidLink = function(href) {
@@ -37,7 +48,6 @@ Scraper.prototype.isValidLink = function(href) {
     }
   }
   if (urlObj && (urlObj.host === 'mega.co.nz' || urlObj.host === 'mega.nz')) {
-    console.log('Grabbing href', href);
     return true;
   }
   return false;

@@ -49,10 +49,10 @@ RedditScraper.prototype.scrape = function() {
  * Finds all valid megalinks and queues comment page links 
  */
 RedditScraper.prototype.topLevelScrape = function() {
+  var _this = this;
   var deferred = Q.defer();
   var url = this.searchTerm ? this.getSearchUrl() : this.baseUrl + 'r/megalinks'; 
   request(url, function(err, response, body) {
-    var _this = this;
     this.toExplore = {};
     try {
       var $ = cheerio.load(body);
