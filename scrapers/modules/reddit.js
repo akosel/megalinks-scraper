@@ -5,7 +5,6 @@
  */
 
 var Scraper = require('../scraper.js');
-var Megalink = require('../../models/megalink');
 var util = require('util');
 var request = require("request");
 var cheerio = require("cheerio");
@@ -60,8 +59,7 @@ RedditScraper.prototype.topLevelScrape = function() {
         var newHref = $(this).attr('href');
         var text = $(this).text();
         if (_this.isValidLink(newHref)) {
-          var megalink = new Megalink(text, newHref);
-          _this.megalinks.push(megalink);
+          _this.addLink(text, newHref);
         } else {
           var commentPageUrl = _this.baseUrl + newHref;
           _this.toExplore[commentPageUrl] = text;
@@ -93,11 +91,10 @@ RedditScraper.prototype.commentsPageScrape = function() {
       var name = _this.toExplore[link];
 
       request(link, function(err, response, body) {
-        var megalink = new Megalink(name, []);
         console.log('Requested', link);
 
         if (_this.isValidLink(this.href)) {
-          megalink.addLink(this.href);
+          _this.addLink(name, this.href);
         } else {
 
           try {
@@ -107,7 +104,7 @@ RedditScraper.prototype.commentsPageScrape = function() {
             $('a').each(function(a, el) {
               var newHref = $(this).attr('href');
               if (_this.isValidLink(newHref)) {
-                megalink.addLink(newHref);
+                _this.addLink(name, newHref);
               }
             });
 
@@ -118,7 +115,7 @@ RedditScraper.prototype.commentsPageScrape = function() {
               if (text.match(re)) {
                 var megaTag = text.match(re)[0];
                 link = megaTag.replace(/mega:/, "https://mega.co.nz/");
-                megalink.addLink(link);
+                _this.addLink(name, link);
               }
             });
 
@@ -126,7 +123,6 @@ RedditScraper.prototype.commentsPageScrape = function() {
             console.log('Page Read Error: ', e);
           }
 
-          _this.megalinks.push(megalink);
           deferred.resolve();
         } 
       });

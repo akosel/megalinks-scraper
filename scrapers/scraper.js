@@ -5,33 +5,57 @@
 
 var request = require("request");
 var cheerio = require("cheerio");
+var Megalink = require('../models/megalink');
 var url = require('url');
 var store = require('../models/store');
 
 var Scraper = function(url) {
   this.baseUrl = url;
-  this.megalinks = [];
+  this.megalinks = {};
 };
 
 /*
  * Saves scraper megalinks to store
  */
 Scraper.prototype.save = function() {
-  this.megalinks.forEach(function(megalink) {
+  console.log('Saving', this.megalinks);
+  Object.keys(this.megalinks).forEach(function(name) {
+    var toSave = this.megalinks[name].toSave;
+    var megalink = new Megalink(name, toSave);
     store.add(megalink);
-  });
+  }.bind(this));
 
   store.save();
 };
 
 /*
- * Check if a link is a keeplink
+ * Return false by default. May be implemented by child.
  */
-Scraper.prototype.isKeeplink = function(url) {
-  if (url.indexOf('keeplink') > -1) {
-    return true;
+Scraper.prototype.shouldUsePhantom = function(href) {
+  return false;
+};
+
+/*
+ * Return false by default. May be implemented by child.
+ */
+Scraper.prototype.shouldExplore = function(href) {
+  return false;
+};
+
+Scraper.prototype.addLink = function(name, href) {
+  console.log('Adding lint', href);
+  if (!this.megalinks[name]) {
+    this.megalinks[name] = { toExplore: [], toPhantom: [], toSave: [] };
+  }
+
+  if (this.isValidLink(href)) {
+    this.megalinks[name].toSave.push(href);
+  } else if (this.shouldUsePhantom(href)) {
+    this.megalinks[name].toPhantom.push(href);
+  } else if (this.shouldExplore(href)) {
+    this.megalinks[name].toExplore.push(href);
   } else {
-    return false;
+    console.log('No action for this link');
   }
 };
 

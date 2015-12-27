@@ -5,7 +5,6 @@
 
 var Scraper = require('../scraper.js');
 var KeeplinkScraper = require('../modules/keeplinks.js');
-var Megalink = require('../../models/megalink');
 var util = require('util');
 var request = require("request");
 var cheerio = require("cheerio");
@@ -25,21 +24,22 @@ util.inherits(YourserieScraper, Scraper);
 YourserieScraper.prototype.getSearchUrl = function() {
   return this.baseUrl + '?s=' + this.searchTerm + '&paged=1';
 };
+
 /*
  * Add megalinks 
  */
 YourserieScraper.prototype.scrape = function() {
   return this.topLevelScrape()
-    .then(function() {
-      console.log('Adding keeplinks');
-      return this.keeplinkScraper.scrape();
-    }.bind(this), function(e) {
+    .then(this.explore.bind(this), function(e) {
+      console.trace();
+      console.log(e);
+    }.bind(this))
+    .then(this.phantom.bind(this), function(e) {
       console.trace();
       console.log(e);
     }.bind(this))
     .then(function() {
-      console.log('Merging yourserie and keeplink lists');
-      Array.prototype.push.apply(this.megalinks, this.keeplinkScraper.megalinks);
+      console.log('final step', this);
     }.bind(this));
 };
 
@@ -60,58 +60,76 @@ YourserieScraper.prototype.topLevelScrape = function() {
       var $ = cheerio.load(body);
       var els = $('.type-post').each(function(i, el) { 
         var name = $(this).find('.entry-title').text();
-        var megalink = new Megalink(name, []);
 
         var links = $(this).find('a').filter(function(i, el) { 
           return $(this).text().trim() === 'MEGA'; 
         }); 
         links.slice(0,1).each(function(i, el) {
           var href = $(this).attr('href');
-          console.log(name, href);
-
-          result = result.then(function(redirectUrl) {
-            console.log(redirectUrl);
-            if (redirectUrl) {
-              if (_this.isValidLink(redirectUrl)) {
-                megalink.addLink(redirectUrl);
-              } else if (_this.isKeeplink(redirectUrl)) {
-                var parsedUrl = url.parse(redirectUrl);
-                var hash = parsedUrl.pathname.split('/').slice(-1)[0];
-                console.log(name, hash);
-                _this.keeplinkScraper.addHash(name, hash);
-              }
-            }
-
-            return _this.getRedirect(href);
-          });
-
+          if (href) {
+            _this.addLink(name, href);
+          }
         });
 
-        // May be one more in the pipe
-        result.then(function(redirectUrl) {
-          if (redirectUrl) {
-            if (_this.isValidLink(redirectUrl)) {
-              megalink.addLink(redirectUrl);
-            } else if (_this.isKeeplink(redirectUrl)) {
-              var parsedUrl = url.parse(redirectUrl);
-              var hash = parsedUrl.pathname.split('/').slice(-1)[0];
-                console.log(name, hash);
-              _this.keeplinkScraper.addHash(name, hash);
-            }
-            _this.megalinks.push(megalink);
-          }
-          deferred.resolve();
-        }.bind(this), function(e) {
-          console.log(e); 
-        }.bind(this));
-
       })
+      console.log(_this);
+      deferred.resolve();
     } catch(e) {
       console.trace();
       console.log(e);
     }
   }.bind(this));
   return deferred.promise;
+};
+
+/*
+ * Use phantomjs to better scrape page
+ * NOTE: Purposefully synchronous. Running a lot of phantomjs processes at once
+ *       is intensive. May want to add some batching later.
+ */
+YourserieScraper.prototype.phantom = function() {
+  var _this = this;
+  var result;
+  Object.keys(this.megalinks).forEach(function(name) {
+    var keeplinks = _this.megalinks[name].toPhantom;
+
+    while (keeplinks.length) {
+      if (!result) {
+        result = Q(keeplinks.pop());
+      } else {
+        var nextLink = keeplinks.pop();
+      }
+      result = result.then(function(link) {
+        link = link || nextLink;
+        return _this.keeplinkScraper.getMegalink(link).then(function(link) {
+          if (link) {
+            _this.addLink(name, link);
+          }
+        });
+      });
+    }
+  });
+
+  return result;
+};
+
+YourserieScraper.prototype.explore = function() {
+  var _this = this;
+
+  var deferreds = [];
+  Object.keys(this.megalinks).forEach(function(name) {
+    var toExplore = _this.megalinks[name].toExplore;
+    console.log('toExplore', name, toExplore);
+
+    // XXX Remove from list here. Could treat toExplore as queue/stack
+    toExplore.forEach(function(link) {
+      deferreds.push(_this.getRedirect(link).then(function(redirectUrl) {
+        console.log('from redirect', name, redirectUrl);
+        _this.addLink(name, redirectUrl);
+      }));
+    });
+  });
+  return Q.all(deferreds);
 };
 
 /*
@@ -128,6 +146,7 @@ YourserieScraper.prototype.getRedirect = function(uri) {
       d.reject(err);
     }
     var redirectUrl = res.headers.location;
+    console.log('redirect', redirectUrl);
     if (!redirectUrl) {
       deferred.resolve();
     } else {
@@ -135,6 +154,23 @@ YourserieScraper.prototype.getRedirect = function(uri) {
     }
   }.bind(this));
   return deferred.promise;
+};
+
+YourserieScraper.prototype.shouldUsePhantom = function(href) {
+  console.log('phant check', href);
+  if (href.indexOf('keeplink') > -1) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+YourserieScraper.prototype.shouldExplore = function(href) {
+  var urlObj = url.parse(href);
+  if (urlObj.host === 'sh.st') {
+    return true;
+  }
+  return false;
 };
 
 module.exports = YourserieScraper;

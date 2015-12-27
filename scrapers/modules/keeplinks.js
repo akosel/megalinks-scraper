@@ -47,30 +47,13 @@ KeeplinkScraper.prototype.scrape = function() {
   console.log(this.hashes);
   Object.keys(this.hashes).forEach(function(name) {
 
-    var result = Q();
     var hashes = this.hashes[name]; 
-    var megalink = new Megalink(name, []);
     hashes.forEach(function(hash) {
       var url = this.getFullUrl(hash); 
       console.log(name, url);
-      result = result.then(function(resultUrl) { 
-        console.log(name, resultUrl);
-        if (resultUrl && this.isValidLink(resultUrl)) {
-          megalink.addLink(resultUrl);
-        }
-        return this.getMegalink(url);
-      }.bind(this));
-    }.bind(this));
-    result = result.then(function(resultUrl) { 
-      console.log(name, resultUrl);
-      if (resultUrl && this.isValidLink(resultUrl)) {
-        megalink.addLink(resultUrl);
-      }
-      return this.getMegalink(url);
-    }.bind(this));
-    this.megalinks.push(megalink);
 
-    all = all.then(function() { return result; });
+    }.bind(this));
+
   }.bind(this));
 
   return all;

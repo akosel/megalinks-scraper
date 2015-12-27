@@ -15,10 +15,7 @@ var searchTerm = program.searchTerm ? program.searchTerm : undefined;
 var scraper = new Scraper(searchTerm);
 scraper.scrape().then(function() {
   console.log('Scrape complete', scraper.megalinks);
-  scraper.megalinks.forEach(function(megalink) {
-    store.add(megalink); 
-  });
-  store.save();
+  scraper.save();
 }, function(e) {
   console.log(e); 
 });
