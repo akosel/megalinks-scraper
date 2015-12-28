@@ -71,6 +71,11 @@ Megalink.prototype.download = function() {
   this.links.forEach(function(link) {  
     var megadl = spawn("megadl", ['--path=/media/exthd', link], [], { detached: true, stdio: ['ignore', out, err] }); 
 
+    megadl.stdout.on('data', function(data) {
+      process.stdout.clearLine();
+      process.stdout.cursorTo(0);
+      process.stdout.write(data.toString());
+    });
     megadl.stderr.on('data', function(data) {
       console.error(data.toString());
     });
