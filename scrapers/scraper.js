@@ -89,4 +89,11 @@ Scraper.prototype.scrape = function() {
   // Implemented by child class
 };
 
+/*
+ * Explores pages for megalinks
+ */
+Scraper.prototype.explore = function() {
+  // Implemented by child class
+};
+
 module.exports = Scraper;

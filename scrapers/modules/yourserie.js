@@ -38,13 +38,17 @@ YourserieScraper.prototype.scrape = function() {
       console.trace();
       console.log(e);
     }.bind(this))
+    .then(this.explore.bind(this), function(e) {
+      console.trace();
+      console.log(e);
+    }.bind(this))
     .then(function() {
       console.log('final step', this);
     }.bind(this));
 };
 
 /*
- * Gather links
+ * Gather links from main page
  */
 YourserieScraper.prototype.topLevelScrape = function() {
   var _this = this;
@@ -113,6 +117,9 @@ YourserieScraper.prototype.phantom = function() {
   return result;
 };
 
+/*
+ * Follows shortlinks
+ */
 YourserieScraper.prototype.explore = function() {
   var _this = this;
 
@@ -121,11 +128,12 @@ YourserieScraper.prototype.explore = function() {
     var toExplore = _this.megalinks[name].toExplore;
 
     // XXX Remove from list here. Could treat toExplore as queue/stack
-    toExplore.forEach(function(link) {
+    while (toExplore.length) {
+      var link = toExplore.pop();
       deferreds.push(_this.getRedirect(link).then(function(redirectUrl) {
         _this.addLink(name, redirectUrl);
       }));
-    });
+    }
   });
   return Q.all(deferreds);
 };
@@ -153,6 +161,9 @@ YourserieScraper.prototype.getRedirect = function(uri) {
   return deferred.promise;
 };
 
+/*
+ * Keeplinks require a phantom script 
+ */
 YourserieScraper.prototype.shouldUsePhantom = function(href) {
   if (href.indexOf('keeplink') > -1) {
     return true;
@@ -161,6 +172,9 @@ YourserieScraper.prototype.shouldUsePhantom = function(href) {
   }
 };
 
+/*
+ * Shortlinks require following
+ */
 YourserieScraper.prototype.shouldExplore = function(href) {
   var urlObj = url.parse(href);
   if (urlObj.host === 'sh.st') {

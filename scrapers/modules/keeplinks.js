@@ -82,7 +82,7 @@ KeeplinkScraper.prototype.getMegalink = function(url) {
       //    deferred.resolve(url);
       //  }
       //});
-      deferred.resolve();
+      deferred.resolve(data.toString());
     }
   }.bind(this));
 
