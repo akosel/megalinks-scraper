@@ -8,6 +8,7 @@ process.stdin.setEncoding('utf8');
 program
   .version('0.0.1')
   .option('-l, --link [value]', 'A particular megalink')
+  .option('-a', 'Show all links')
   .parse(process.argv);
 
 var megalinks = []; 
@@ -18,6 +19,9 @@ if (!program.link) {
     var megalink = new Megalink(name, links); 
     if (links && links.length) {
       console.log(megalinks.length, megalink.name);
+      if (program.A) {
+        console.log(links);
+      }
       megalinks.push(megalink);
     }
   });

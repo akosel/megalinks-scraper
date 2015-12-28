@@ -45,4 +45,10 @@ function main(url) {
       }
     }
   }, 1000);
+
+  setTimeout(function() {
+    console.log('TIMEOUT');
+    clearInterval(id);
+    phantom.exit();
+  }, 10000);
 }

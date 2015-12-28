@@ -60,6 +60,7 @@ YourserieScraper.prototype.topLevelScrape = function() {
       var $ = cheerio.load(body);
       var els = $('.type-post').each(function(i, el) { 
         var name = $(this).find('.entry-title').text();
+        var src = $(this).find('img').attr('src');
 
         var links = $(this).find('a').filter(function(i, el) { 
           return $(this).text().trim() === 'MEGA'; 
@@ -67,12 +68,11 @@ YourserieScraper.prototype.topLevelScrape = function() {
         links.slice(0,1).each(function(i, el) {
           var href = $(this).attr('href');
           if (href) {
-            _this.addLink(name, href);
+            _this.addLink(name, href, src);
           }
         });
 
       })
-      console.log(_this);
       deferred.resolve();
     } catch(e) {
       console.trace();
@@ -119,12 +119,10 @@ YourserieScraper.prototype.explore = function() {
   var deferreds = [];
   Object.keys(this.megalinks).forEach(function(name) {
     var toExplore = _this.megalinks[name].toExplore;
-    console.log('toExplore', name, toExplore);
 
     // XXX Remove from list here. Could treat toExplore as queue/stack
     toExplore.forEach(function(link) {
       deferreds.push(_this.getRedirect(link).then(function(redirectUrl) {
-        console.log('from redirect', name, redirectUrl);
         _this.addLink(name, redirectUrl);
       }));
     });
@@ -146,7 +144,6 @@ YourserieScraper.prototype.getRedirect = function(uri) {
       d.reject(err);
     }
     var redirectUrl = res.headers.location;
-    console.log('redirect', redirectUrl);
     if (!redirectUrl) {
       deferred.resolve();
     } else {
@@ -157,7 +154,6 @@ YourserieScraper.prototype.getRedirect = function(uri) {
 };
 
 YourserieScraper.prototype.shouldUsePhantom = function(href) {
-  console.log('phant check', href);
   if (href.indexOf('keeplink') > -1) {
     return true;
   } else {

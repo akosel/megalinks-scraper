@@ -7,22 +7,24 @@ var fs = require('fs');
 var out = fs.openSync('/tmp/out.log', 'a');
 var err = fs.openSync('/tmp/out.log', 'a');
 
-var Megalink = function(name, links) {
+var Megalink = function(name, links, src) {
   this.name = name;
 
   if (typeof(links) === 'string') {
     links = [links];
   }
   this.links = links || [];
+  this.src = src;
 };
 
 Megalink.prototype.get = function() {
-  return { name: this.name, links: this.links };
+  return { name: this.name, links: this.links, src: this.src };
 };
 
 Megalink.prototype.set = function(obj) {
   this.name = obj.name ? obj.name : this.name;
   this.links = obj.links ? obj.links : this.links;
+  this.src = obj.src ? obj.src : this.src;
 };
 
 Megalink.prototype.addLink = function(link) {

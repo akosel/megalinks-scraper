@@ -21,7 +21,8 @@ Scraper.prototype.save = function() {
   console.log('Saving', this.megalinks);
   Object.keys(this.megalinks).forEach(function(name) {
     var toSave = this.megalinks[name].toSave;
-    var megalink = new Megalink(name, toSave);
+    var src = this.megalinks[name].src;
+    var megalink = new Megalink(name, toSave, src);
     store.add(megalink);
   }.bind(this));
 
@@ -42,10 +43,14 @@ Scraper.prototype.shouldExplore = function(href) {
   return false;
 };
 
-Scraper.prototype.addLink = function(name, href) {
-  console.log('Adding lint', href);
+Scraper.prototype.addLink = function(name, href, src) {
+  console.log('Adding link', href);
   if (!this.megalinks[name]) {
     this.megalinks[name] = { toExplore: [], toPhantom: [], toSave: [] };
+  }
+
+  if (src) {
+    this.megalinks[name].src = src;
   }
 
   if (this.isValidLink(href)) {
