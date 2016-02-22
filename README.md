@@ -7,7 +7,7 @@ Node scraper that checks for links in /r/megalinks on reddit and creates a json 
 # Install
 1. Clone the git repository
 2. Run `npm install`
-3. Install [Megatools](https://github.com/megous/megatools)
+3. (Optional. Only needed if you want to download using CLI.) Install [Megatools](https://github.com/megous/megatools)
 
 # Usage
 Scrapes r/megalinks landing page for links
