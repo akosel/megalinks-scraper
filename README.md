@@ -10,6 +10,16 @@ Node scraper that checks for links in /r/megalinks on reddit and creates a json 
 3. Install [Megatools](https://github.com/megous/megatools)
 
 # Usage
+Scrapes r/megalinks landing page for links
+```
+./scraper.js -t reddit
+```
+
+Scrapes tumovie.net landing page for links
+```
+./scraper.js -t tumovie
+```
+
 To search for a given TV show (first two pages of results)
 ```
 ./scraper.js -s <tv_series_name> -t yourserie --start 1 --end 2
