@@ -14,7 +14,6 @@ program
 
 var Scraper = require('./scrapers/modules/' + program.type);
 
-console.log(program);
 var searchTerm = program.searchTerm ? program.searchTerm : undefined;
 var scraper = new Scraper(searchTerm, program.start || 1, program.end || program.start + 1);
 scraper.scrape().then(function() {
