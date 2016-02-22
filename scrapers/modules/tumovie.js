@@ -1,7 +1,6 @@
 /*
  * tumovie.js
  * Get links from tumovie 
- * WARNING: THIS DOESN'T WORK AFTER THE CHANGES MADE ON 12/30/2015
  */
 
 var YourserieScraper = require('../modules/yourserie.js');
