@@ -12,21 +12,23 @@ var url = require('url');
 var Q = require('q');
 var spawn = require('child_process').spawn;
 
-var YourserieScraper = function(searchTerm) {
-  Scraper.apply(this);
+var YourserieScraper = function(searchTerm, start, end) {
+  Scraper.apply(this, arguments);
 
   this.baseUrl = 'http://www.yourserie.com/';
-  this.searchTerm = searchTerm; 
+  this.searchTerm = searchTerm;
+  this.start = start;
+  this.end = end;
   this.keeplinkScraper = new KeeplinkScraper();
 };
 util.inherits(YourserieScraper, Scraper);
 
-YourserieScraper.prototype.getSearchUrl = function() {
-  return this.baseUrl + '?s=' + this.searchTerm + '&paged=1';
+YourserieScraper.prototype.getSearchUrl = function(page) {
+  return this.baseUrl + '?s=' + this.searchTerm + '&paged=' + page;
 };
 
 /*
- * Add megalinks 
+ * Add megalinks
  */
 YourserieScraper.prototype.scrape = function() {
   return this.topLevelScrape()
@@ -53,37 +55,43 @@ YourserieScraper.prototype.scrape = function() {
 YourserieScraper.prototype.topLevelScrape = function() {
   var _this = this;
 
-  var topUrl = this.searchTerm ? this.getSearchUrl() : this.baseUrl; 
-  console.log(topUrl);
+  var deferreds = [];
 
-  var deferred = Q.defer();
-  request(topUrl, function(err, response, body) {
-    this.toExplore = {};
-    var result = Q();
-    try {
-      var $ = cheerio.load(body);
-      var els = $('.type-post').each(function(i, el) { 
-        var name = $(this).find('.entry-title').text();
-        var src = $(this).find('img').attr('src');
+  for (var i = this.start; i <= this.end; i +=1) {
+    var topUrl = this.searchTerm ? this.getSearchUrl(i) : this.baseUrl;
+    console.log(topUrl);
+    var deferred = Q.defer();
+    deferreds.push(deferred.promise);
+    (function(d) {
+      request(topUrl, function(err, response, body) {
+        this.toExplore = {};
+        try {
+          var $ = cheerio.load(body);
+          var els = $('.type-post').each(function(i, el) {
+            var name = $(this).find('.entry-title').text();
+            var src = $(this).find('img').attr('src');
 
-        var links = $(this).find('a').filter(function(i, el) { 
-          return $(this).text().trim() === 'MEGA'; 
-        }); 
-        links.slice(0,1).each(function(i, el) {
-          var href = $(this).attr('href');
-          if (href) {
-            _this.addLink(name, href, src);
-          }
-        });
+            var links = $(this).find('a').filter(function(i, el) {
+              return $(this).text().trim() === 'MEGA';
+            });
+            links.slice(0,1).each(function(i, el) {
+              var href = $(this).attr('href');
+              if (href) {
+                _this.addLink(name, href, src);
+              }
+            });
 
-      })
-      deferred.resolve();
-    } catch(e) {
-      console.trace();
-      console.log(e);
-    }
-  }.bind(this));
-  return deferred.promise;
+          })
+          d.resolve();
+        } catch(e) {
+          console.trace();
+          console.log(e);
+        }
+      }.bind(this));
+    })(deferred);
+  }
+
+  return Q.all(deferreds).then(function() {});
 };
 
 /*
@@ -143,11 +151,11 @@ YourserieScraper.prototype.explore = function() {
  */
 YourserieScraper.prototype.getRedirect = function(uri) {
   var deferred = Q.defer();
-  var options = { 
-    uri: uri, 
-    followRedirect: false 
+  var options = {
+    uri: uri,
+    followRedirect: false
   };
-  request.head(options, function(err, res, body) { 
+  request.head(options, function(err, res, body) {
     if (err) {
       d.reject(err);
     }
@@ -162,7 +170,7 @@ YourserieScraper.prototype.getRedirect = function(uri) {
 };
 
 /*
- * Keeplinks require a phantom script 
+ * Keeplinks require a phantom script
  */
 YourserieScraper.prototype.shouldUsePhantom = function(href) {
   if (href.indexOf('keeplink') > -1) {
@@ -177,7 +185,7 @@ YourserieScraper.prototype.shouldUsePhantom = function(href) {
  */
 YourserieScraper.prototype.shouldExplore = function(href) {
   var urlObj = url.parse(href);
-  if (urlObj.host === 'sh.st') {
+  if (urlObj.host === 'sh.st' || urlObj.host === 'bit.ly') {
     return true;
   }
   return false;

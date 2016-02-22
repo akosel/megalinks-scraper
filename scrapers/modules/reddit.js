@@ -66,7 +66,6 @@ RedditScraper.prototype.topLevelScrape = function() {
         }
       });
       deferred.resolve();
-      console.log(this.toExplore);
     } catch(e) {
       console.trace();
       deferred.reject(e);
