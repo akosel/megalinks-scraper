@@ -6,7 +6,7 @@ var url = require('url');
 var fs  = require('fs');
 
 var MegalinkList = function(path) {
-  this.path = path || '/tmp/megalinks.json';
+  this.path = path || './megalinks.json';
 };
 
 /*
