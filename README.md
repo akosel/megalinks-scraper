@@ -9,6 +9,24 @@ Node scraper that checks for links in /r/megalinks on reddit and creates a json 
 2. Run `npm install`
 3. Install [Megatools](https://github.com/megous/megatools)
 
-# To use
-Run `scraper.js` at a bare minimum. This will scrape the latest links from reddit.
-After this, run `downloader.js` to see the available links. Entering the number will attempt to download a given link.
+# Usage
+To search for a given TV show (first two pages of results)
+```
+./scraper.js -s <tv_series_name> -t yourserie --start 1 --end 2
+```
+
+To search for a movie (first two pages of results)
+```
+./scraper.js -s <movie_name> -t tumovie --start 1 --end 2
+```
+
+To search reddit
+```
+./scraper.js -s <movie_name> -t reddit
+```
+
+To see what's available for download from Mega (with links printed out)
+```
+./downloader.js --show-links
+```
+You can enter the number corresponding to what you want to download (if you have megatools in your path) or just paste the link into your browser.
